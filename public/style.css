@@ -1,0 +1,171 @@
+/* Reset & Variabel */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg-color: #fdf5e6;
+  /* Warna latar belakang halaman (krem terang) */
+  --primary-color: #ffde00;
+  /* Kuning terang untuk container */
+  --accent-color: #ff90e8;
+  /* Pink terang untuk pesan user */
+  --bot-color: #ffffff;
+  /* Putih untuk pesan bot */
+  --border-color: #000000;
+  --border-width: 4px;
+  --shadow-solid: 6px 6px 0px 0px var(--border-color);
+}
+
+body {
+  font-family: 'Space Grotesk', sans-serif;
+  background-color: var(--bg-color);
+  background-image: radial-gradient(#000000 1px, transparent 1px);
+  background-size: 20px 20px;
+  /* Memberikan efek pola titik-titik (polka) retro */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  color: #000;
+}
+
+/* Container Utama */
+.app-container {
+  width: 100%;
+  max-width: 450px;
+  height: 85vh;
+  background-color: var(--primary-color);
+  border: var(--border-width) solid var(--border-color);
+  box-shadow: var(--shadow-solid);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  border-radius: 8px;
+}
+
+/* Header */
+.header {
+  background-color: #fff;
+  border-bottom: var(--border-width) solid var(--border-color);
+  padding: 20px;
+  text-align: center;
+}
+
+.header h1 {
+  font-weight: 700;
+  font-size: 24px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.header p {
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 5px;
+}
+
+/* Chat Box Area */
+.chat-container {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  background-color: #e0e7ff;
+  /* Biru pastel untuk area chat */
+}
+
+/* Styling Pesan (Gelembung Chat) */
+.message {
+  max-width: 85%;
+  padding: 12px 16px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  border: 3px solid var(--border-color);
+  border-radius: 4px;
+  word-wrap: break-word;
+  box-shadow: 3px 3px 0px 0px var(--border-color);
+}
+
+/* Pesan User (Kanan) */
+.message.user {
+  align-self: flex-end;
+  background-color: var(--accent-color);
+}
+
+/* Pesan Bot (Kiri) */
+.message.bot {
+  align-self: flex-start;
+  background-color: var(--bot-color);
+}
+
+/* Form Input Area */
+.input-area {
+  display: flex;
+  padding: 15px;
+  background-color: #fff;
+  border-top: var(--border-width) solid var(--border-color);
+  gap: 10px;
+}
+
+.input-area input {
+  flex: 1;
+  padding: 12px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  border: 3px solid var(--border-color);
+  border-radius: 4px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.input-area input:focus {
+  box-shadow: 3px 3px 0px 0px var(--border-color);
+  transform: translate(-3px, -3px);
+}
+
+/* Tombol Kirim */
+.input-area button {
+  padding: 10px 20px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  background-color: #32cd32;
+  /* Hijau terang */
+  color: #000;
+  border: 3px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 4px 4px 0px 0px var(--border-color);
+  transition: all 0.1s ease;
+  text-transform: uppercase;
+}
+
+.input-area button:active {
+  box-shadow: 0px 0px 0px 0px var(--border-color);
+  transform: translate(4px, 4px);
+}
+
+/* Custom Scrollbar (Opsional) */
+::-webkit-scrollbar {
+  width: 10px;
+  border-left: 3px solid var(--border-color);
+}
+
+::-webkit-scrollbar-track {
+  background: #fff;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ff5722;
+  /* Oranye */
+  border: 3px solid var(--border-color);
+  border-radius: 0;
+}

@@ -1,92 +1,56 @@
 import 'dotenv/config';
 import express from 'express';
-import multer from 'multer';
-import { GoogleGenAI } from '@google/genai';
+import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { GoogleGenAI } from "@google/genai";
+
+// Setup dirname untuk ESM (import style)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
-const upload = multer();
-
-// Inisialisasi Gemini API Client
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const GEMINI_MODEL = "gemini-2.5-flash";
 
+app.use(cors());
 app.use(express.json());
 
-// System Instruction untuk Use Case "Chatbot Edukasi Finansial"
-const SYSTEM_INSTRUCTION = "Kamu adalah asisten edukasi finansial yang ramah. Bantu jelaskan konsep keuangan dengan gaya bahasa yang santai dan mudah dipahami, tetapi jangan pernah memberikan saran investasi personal.";
+// Middleware untuk menyajikan file statis (frontend)
+app.use(express.static(path.join(__dirname, 'public')));
 
-// ENDPOINT 1: Generate Text
-app.post('/generate-text', async (req, res) => {
-    const { prompt } = req.body;
+// System Instruction
+const SYSTEM_INSTRUCTION = `Kamu adalah 'Fini', asisten edukasi finansial pintar yang berbicara dengan gaya bahasa santai, asyik, dan menggunakan gaya bahasa anak muda Indonesia masa kini (sesekali gunakan sapaan kak, bro, atau sis). 
+Tugas utama kamu adalah membantu pengguna memahami konsep keuangan, budgeting, dan dasar investasi. 
+ATURAN PENTING: 
+1. Jika pengguna bertanya di luar topik keuangan (misal: cuaca, resep masakan, dll), tolak dengan sopan dan arahkan kembali ke topik finansial.
+2. Jangan pernah memberikan saran investasi yang menjanjikan keuntungan pasti. Selalu ingatkan tentang risiko.
+3. Gunakan emoji agar percakapan lebih hidup!`;
+
+app.post('/api/chat', async (req, res) => {
+    const { conversation } = req.body;
     try {
+        if (!Array.isArray(conversation)) throw new Error('Messages must be an array!');
+
+        const contents = conversation.map(({ role, text }) => ({
+            role: role === 'user' ? 'user' : 'model',
+            parts: [{ text }]
+        }));
+
         const response = await ai.models.generateContent({
             model: GEMINI_MODEL,
-            contents: `${SYSTEM_INSTRUCTION}\n\nPertanyaan pengguna: ${prompt}`
+            contents: contents,
+            config: {
+                temperature: 0.8, // Kreatif tapi tetap informatif
+                systemInstruction: SYSTEM_INSTRUCTION
+            }
         });
+
         res.status(200).json({ result: response.text });
     } catch (e) {
-        console.log(e);
-        res.status(500).json({ message: e.message });
+        res.status(500).json({ error: e.message });
     }
 });
 
-// ENDPOINT 2: Generate From Image
-app.post("/generate-from-image", upload.single("image"), async (req, res) => {
-    const { prompt } = req.body;
-    const base64Image = req.file.buffer.toString("base64");
-    try {
-        const response = await ai.models.generateContent({
-            model: GEMINI_MODEL,
-            contents: [
-                { text: `${SYSTEM_INSTRUCTION}\n\n${prompt ?? "Deskripsikan gambar ini kaitannya dengan keuangan."}`, type: "text" },
-                { inlineData: { data: base64Image, mimeType: req.file.mimetype } }
-            ],
-        });
-        res.status(200).json({ result: response.text });
-    } catch (e) {
-        console.log(e);
-        res.status(500).json({ message: e.message });
-    }
-});
-
-// ENDPOINT 3: Generate From Document
-app.post("/generate-from-document", upload.single("document"), async (req, res) => {
-    const { prompt } = req.body;
-    const base64Document = req.file.buffer.toString("base64");
-    try {
-        const response = await ai.models.generateContent({
-            model: GEMINI_MODEL,
-            contents: [
-                { text: `${SYSTEM_INSTRUCTION}\n\n${prompt ?? "Tolong buat ringkasan dari dokumen keuangan berikut."}`, type: "text" },
-                { inlineData: { data: base64Document, mimeType: req.file.mimetype } }
-            ]
-        });
-        res.status(200).json({ result: response.text });
-    } catch (e) {
-        console.log(e);
-        res.status(500).json({ message: e.message });
-    }
-});
-
-// ENDPOINT 4: Generate From Audio
-app.post("/generate-from-audio", upload.single("audio"), async (req, res) => {
-    const { prompt } = req.body;
-    const base64Audio = req.file.buffer.toString("base64");
-    try {
-        const response = await ai.models.generateContent({
-            model: GEMINI_MODEL,
-            contents: [
-                { text: `${SYSTEM_INSTRUCTION}\n\n${prompt ?? "Tolong buatkan transkrip dari rekaman berikut."}`, type: "text" },
-                { inlineData: { data: base64Audio, mimeType: req.file.mimetype } }
-            ]
-        });
-        res.status(200).json({ result: response.text });
-    } catch (e) {
-        console.log(e);
-        res.status(500).json({ message: e.message });
-    }
-});
-
-// Menjalankan Server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server ready on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`Gemini Chatbot running on http://localhost:${PORT}`));
